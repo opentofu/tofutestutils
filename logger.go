@@ -1,3 +1,8 @@
+// Copyright (c) The OpenTofu Authors
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2023 HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package tofutestutils
 
 import (
@@ -10,7 +15,7 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 )
 
-// NewGoTestLogger returns a log.Logger implementation that writes to testing.T.
+// NewGoLogger returns a log.Logger implementation that writes to testing.T.
 func NewGoLogger(t *testing.T) *log.Logger {
 	return testlog.NewGoTestLogger(t)
 }
