@@ -47,3 +47,37 @@ func TestMyApp(t *testing.T) {
 ```
 
 For a full list of possible functions, please [check the Go docs](https://pkg.go.dev/github.com/opentofu/tofutestutils).
+
+## Handling errors
+
+This package also provides the `Must()` and `Must2()` functions to make test code easier to read. For example:
+
+```go
+package your_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/opentofu/tofutestutils"
+)
+
+func erroringFunction() error {
+	return fmt.Errorf("this is an error")
+}
+
+func erroringFunctionWithReturn() (int, error) {
+	return 42, fmt.Errorf("this is an error")
+}
+
+func TestMyApp(t *testing.T) {
+	// This will cause a panic:
+	tofutestutils.Must(erroringFunction())
+}
+
+func TestMyApp2(t *testing.T) {
+	// This will also cause a panic:
+	result := tofutestutils.Must2(erroringFunctionWithReturn())
+	t.Logf("The number is: %d", result)
+}
+```
