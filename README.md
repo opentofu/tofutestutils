@@ -81,3 +81,47 @@ func TestMyApp2(t *testing.T) {
 	t.Logf("The number is: %d", result)
 }
 ```
+
+## Certificate authority
+
+When you need an x509 certificate for a server or a client, you can use the `tofutestutils.CA` function to obtain a `testca.CertificateAuthority` implementation using a pseudo-random number generator. You can use this to create a certificate for a socket server:
+
+```go
+package your_test
+
+import (
+	"crypto/tls"
+	"io"
+	"net"
+	"strconv"
+	"testing"
+
+	"github.com/opentofu/tofutestutils"
+)
+
+func TestMySocket(t *testing.T) {
+	ca := tofutestutils.CA(t)
+
+	// Server side:
+	tlsListener := tofutestutils.Must2(tls.Listen("tcp", "127.0.0.1:0", ca.CreateLocalhostServerCert().GetServerTLSConfig()))
+	go func() {
+		conn, serverErr := tlsListener.Accept()
+		if serverErr != nil {
+			return
+		}
+		defer func() {
+			_ = conn.Close()
+		}()
+		_, _ = conn.Write([]byte("Hello world!"))
+	}()
+
+	// Client side:
+	port := tlsListener.Addr().(*net.TCPAddr).Port
+	client := tofutestutils.Must2(tls.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)), ca.GetClientTLSConfig()))
+	defer func() {
+		_ = client.Close()
+	}()
+
+	t.Logf("%s", tofutestutils.Must2(io.ReadAll(client)))
+}
+```
