@@ -131,7 +131,7 @@ func newAWSTestService(t *testing.T, services []awsServiceFixture) AWSTestServic
 		return nil
 	}
 	t.Cleanup(func() {
-		if err := localStackContainer.Terminate(ctx); err != nil { //nolint:govet // This shadowing of err is intentional
+		if err := localStackContainer.Terminate(ctx); err != nil {
 			t.Logf("❌ Failed to stop LocalStack container %s: %v", localStackContainer.GetContainerID(), err)
 		}
 	})
