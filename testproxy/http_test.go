@@ -63,7 +63,7 @@ func testHTTPProxyInConnectMode(t *testing.T) {
 		// Note: this will also stop the goroutine below.
 		_ = backingServer.Close()
 	})
-	addr := backingServer.Addr().(*net.TCPAddr) //nolint:errcheck //This is always a TCPAddr, see above.
+	addr := backingServer.Addr().(*net.TCPAddr)
 	addrPort := addr.IP.String() + ":" + strconv.Itoa(addr.Port)
 
 	t.Logf("🪧 Setting up proxy server...")
@@ -250,7 +250,7 @@ func testHTTPProxySetupBackingHTTPServer(ctx context.Context, t *testing.T) stri
 	if err != nil {
 		t.Fatal(err)
 	}
-	tcpAddr := listener.Addr().(*net.TCPAddr) //nolint:errcheck //This is always a TCPAddr, see above.
+	tcpAddr := listener.Addr().(*net.TCPAddr)
 	addr := testHTTPProxyStartHTTPServer(t, tcpAddr, listener)
 	testHTTPProxyWaitForHTTPServer(ctx, t, addr, nil)
 	return addr
@@ -268,7 +268,7 @@ func testHTTPProxySetupBackingHTTPSServer(ctx context.Context, t *testing.T, ca 
 	if err != nil {
 		t.Fatal(err)
 	}
-	tcpAddr := listener.Addr().(*net.TCPAddr) //nolint:errcheck //This is always a TCPAddr, see above.
+	tcpAddr := listener.Addr().(*net.TCPAddr)
 	addr := testHTTPProxyStartHTTPServer(t, tcpAddr, listener)
 	testHTTPProxyWaitForHTTPServer(ctx, t, addr, ca.GetPEMCACert())
 	return addr

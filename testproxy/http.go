@@ -344,8 +344,8 @@ func (h *httpProxyService) start() error {
 		return fmt.Errorf("failed to listen on HTTPS port (%w)", err)
 	}
 
-	h.httpAddr = httpListener.Addr().(*net.TCPAddr)   //nolint:errcheck //This is always a TCPAddr, see above.
-	h.httpsAddr = httpsListener.Addr().(*net.TCPAddr) //nolint:errcheck //This is always a TCPAddr, see above.
+	h.httpAddr = httpListener.Addr().(*net.TCPAddr)
+	h.httpsAddr = httpsListener.Addr().(*net.TCPAddr)
 
 	h.httpServer = &http.Server{
 		Addr:      h.httpAddr.IP.String() + ":" + strconv.Itoa(h.httpAddr.Port),
