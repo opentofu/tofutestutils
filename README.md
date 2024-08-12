@@ -10,6 +10,7 @@ Some tests need to create external resources, such as cloud resources, which nee
 package your_test
 
 import (
+	"testing"
 	"your"
 	
 	"github.com/opentofu/tofutestutils"
