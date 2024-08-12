@@ -57,7 +57,7 @@ func testS3Get(t *testing.T, s3Connection *s3.Client, s3TestBackend testaws.AWSS
 	}
 }
 
-func testS3Put(t *testing.T, s3Connection *s3.Client, s3TestBackend testutils.AWSS3TestService) {
+func testS3Put(t *testing.T, s3Connection *s3.Client, s3TestBackend testaws.AWSS3TestService) {
 	ctx := tofutestutils.Context(t)
 	t.Logf("💾 Checking if an object can be stored...")
 	if _, err := s3Connection.PutObject(

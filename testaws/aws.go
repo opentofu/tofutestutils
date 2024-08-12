@@ -23,6 +23,7 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/opentofu/tofutestutils/testca"
 	"github.com/opentofu/tofutestutils/testcontext"
+	"github.com/opentofu/tofutestutils/testlog"
 	"github.com/opentofu/tofutestutils/testrandom"
 	testcontainers "github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -123,7 +124,7 @@ func newAWSTestService(t *testing.T, services []awsServiceFixture) AWSTestServic
 	localStackContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: request,
 		Started:          true,
-		Logger:           newAdapter(t),
+		Logger:           testlog.NewTestContainersLogger(t),
 	})
 	if err != nil {
 		t.Skipf("❌ Failed to start LocalStack backend: %v", err)
@@ -180,7 +181,7 @@ type awsServiceFixture interface {
 type awsTestService struct {
 	t           *testing.T
 	ctx         context.Context
-	ca          CertificateAuthority
+	ca          testca.CertificateAuthority
 	caCertFile  string
 	endpoint    string
 	region      string
