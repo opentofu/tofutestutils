@@ -110,11 +110,11 @@ func (s s3ServiceFixture) Teardown(service *awsTestService) error {
 }
 
 func (s s3ServiceFixture) emptyS3Bucket(cleanupContext context.Context, service *awsTestService, s3Connection *s3.Client) error {
-	var marker *string
+	var continuationToken *string
 	for {
-		listObjectsResult, err := s3Connection.ListObjects(cleanupContext, &s3.ListObjectsInput{
-			Bucket: &service.s3Bucket,
-			Marker: marker,
+		listObjectsResult, err := s3Connection.ListObjectsV2(cleanupContext, &s3.ListObjectsV2Input{
+			Bucket:            &service.s3Bucket,
+			ContinuationToken: continuationToken,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to clean up test bucket as the list objects call failed %s: %w", service.s3Bucket, err)
@@ -144,8 +144,8 @@ func (s s3ServiceFixture) emptyS3Bucket(cleanupContext context.Context, service 
 				return fmt.Errorf("failed to clean up test bucket %s: %w", service.s3Bucket, err)
 			}
 		}
-		marker = listObjectsResult.NextMarker
-		if marker == nil {
+		continuationToken = listObjectsResult.NextContinuationToken
+		if continuationToken == nil {
 			break
 		}
 	}
