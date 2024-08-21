@@ -8,6 +8,7 @@ package testaws
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -28,6 +29,8 @@ type AWSDynamoDBTestService interface {
 	DynamoDBTable() string
 }
 
+var dynamoDBNameReplaceRe = regexp.MustCompile(`[^a-zA-Z0-9._-]`)
+
 type dynamoDBServiceFixture struct {
 }
 
@@ -42,7 +45,7 @@ func (d dynamoDBServiceFixture) LocalStackID() string {
 func (d dynamoDBServiceFixture) Setup(service *awsTestService) error {
 	const maxDynamoDBTableNameLength = uint(255)
 	const desiredDynamoDBTableNameSuffixLength = uint(12)
-	prefix := strings.ReplaceAll(fmt.Sprintf("opentofu-test-%s-", service.t.Name()), ":", "")
+	prefix := fmt.Sprintf("opentofu-test-%s-", strings.ToLower(dynamoDBNameReplaceRe.ReplaceAllString(service.t.Name(), "")))
 	tableName := testrandom.IDPrefix(
 		prefix,
 		min(maxDynamoDBTableNameLength-uint(len(prefix)), desiredDynamoDBTableNameSuffixLength),

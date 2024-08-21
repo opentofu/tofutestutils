@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -74,6 +75,8 @@ func New(t *testing.T) AWSTestService {
 	})
 }
 
+var nameRe = regexp.MustCompile(`[^a-zA-Z0-9_.-]`)
+
 func newAWSTestService(t *testing.T, services []awsServiceFixture) AWSTestService {
 	t.Logf("🚧 Configuring AWS test service...")
 	ctx := testcontext.DefaultContext(t)
@@ -112,7 +115,7 @@ func newAWSTestService(t *testing.T, services []awsServiceFixture) AWSTestServic
 		ExposedPorts: []string{
 			natPort,
 		},
-		Name: t.Name(),
+		Name: nameRe.ReplaceAllString(t.Name(), ""),
 		HostConfigModifier: func(config *container.HostConfig) {
 			config.Binds = []string{
 				fmt.Sprintf("%s:/opt/certs", tempDir),

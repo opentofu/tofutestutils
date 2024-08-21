@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -32,6 +33,8 @@ type AWSS3TestService interface {
 	S3UsePathStyle() bool
 }
 
+var s3ReplaceRe = regexp.MustCompile(`[^a-zA-Z0-9._-]`)
+
 type s3ServiceFixture struct {
 }
 
@@ -48,7 +51,7 @@ func (s s3ServiceFixture) Setup(service *awsTestService) error {
 	const desiredS3BucketNameSuffixLength = uint(12)
 	prefix := fmt.Sprintf(
 		"opentofu-test-%s-",
-		strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(service.t.Name(), "_", "-"), ":", "")),
+		strings.ToLower(s3ReplaceRe.ReplaceAllString(service.t.Name(), "")),
 	)
 	bucketName := testrandom.IDPrefix(
 		prefix,

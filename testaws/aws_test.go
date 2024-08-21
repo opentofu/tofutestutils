@@ -35,3 +35,11 @@ func TestAWS(t *testing.T) {
 		testSTSService(t, awsService)
 	})
 }
+
+func TestAWSSubtestNameSanitization(t *testing.T) {
+	t.Parallel()
+	t.Run("subtest", func(t *testing.T) {
+		t.Parallel()
+		_ = testaws.New(t)
+	})
+}
