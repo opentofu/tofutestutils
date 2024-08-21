@@ -11,6 +11,19 @@ import (
 	"time"
 )
 
+const minCleanupSafety = time.Second * 30
+const maxCleanupSafety = time.Minute * 5
+
+// DefaultContext creates a context with the default safety settings. For usage details, see Context.
+func DefaultContext(t *testing.T) context.Context {
+	return Context(
+		t,
+		4,
+		minCleanupSafety,
+		maxCleanupSafety,
+	)
+}
+
 // Context creates a context with a deadline that allows for enough time to clean up a test before the testing framework
 // unceremoniously kills the process. The desired time is expressed as a fraction of the time remaining until the hard
 // timeout, such as 4 for 25%. The minimumCleanupTime and maximumCleanupTime clamp the remaining time.
