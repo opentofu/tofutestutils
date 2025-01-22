@@ -47,3 +47,68 @@ func TestMyApp(t *testing.T) {
 ```
 
 For a full list of possible functions, please [check the Go docs](https://pkg.go.dev/github.com/opentofu/tofutestutils).
+
+## Certificate authority
+
+When you need an x509 certificate for a server or a client, you can use the `tofutestutils.CA` function to obtain a `testca.CertificateAuthority` implementation using a pseudo-random number generator. You can use this to create a certificate for a socket server:
+
+```go
+package your_test
+
+import (
+	"crypto/tls"
+	"io"
+	"net"
+	"strconv"
+	"testing"
+
+	"github.com/opentofu/tofutestutils"
+)
+
+func TestMySocket(t *testing.T) {
+	ca := tofutestutils.CA(t)
+
+	// Server side:
+	tlsListener, err := tls.Listen("tcp", "127.0.0.1:0", ca.CreateLocalhostServerCert().GetServerTLSConfig())
+	if err != nil {
+		t.Fatalf("Failed to open server: %v", err)
+    }
+	defer func() {
+		if err = tlsListener.Close(); err != nil {
+			t.Fatalf("Failed to close server listener: %v", err)
+        }
+	}()
+	go func() {
+		conn, serverErr := tlsListener.Accept()
+		if serverErr != nil {
+			return
+		}
+		defer func() {
+			if err := conn.Close(); err != nil {
+				t.Logf("Failed to close connection: %v", err)
+            }
+		}()
+		if _, err = conn.Write([]byte("Hello world!")); err != nil {
+			t.Logf("Failed to write to client: %v", err)
+        }
+	}()
+
+	// Client side:
+	port := tlsListener.Addr().(*net.TCPAddr).Port
+	client, err := tls.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)), ca.GetClientTLSConfig())
+	if err != nil {
+		t.Fatalf("Failed to open connection to server: %v", err)
+    }
+	defer func() {
+		if err = client.Close(); err != nil {
+			t.Fatalf("Failed to close client: %v", err)
+        }
+	}()
+
+	data, err := io.ReadAll(client)
+	if err != nil {
+		t.Fatal(err)
+    }
+	t.Logf("%s", data)
+}
+```
