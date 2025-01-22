@@ -37,18 +37,18 @@ func RandomIDFromSource(random *rand.Rand, length uint, characterSpace testrando
 
 // DeterministicRandomInt produces a deterministic random integer based on the test name between the specified min and
 // max value (inclusive).
-func DeterministicRandomInt(t *testing.T, min int, max int) int {
-	return testrandom.DeterministicInt(t, min, max)
+func DeterministicRandomInt(t *testing.T, minValue int, maxValue int) int {
+	return testrandom.DeterministicInt(t, minValue, maxValue)
 }
 
 // RandomInt produces a random integer between the specified min and max value (inclusive).
-func RandomInt(min int, max int) int {
-	return testrandom.Int(min, max)
+func RandomInt(minValue int, maxValue int) int {
+	return testrandom.Int(minValue, maxValue)
 }
 
 // RandomIntFromSource produces a random integer between the specified min and max value (inclusive).
-func RandomIntFromSource(source *rand.Rand, min int, max int) int {
-	return testrandom.IntFromSource(source, min, max)
+func RandomIntFromSource(source *rand.Rand, minValue int, maxValue int) int {
+	return testrandom.IntFromSource(source, minValue, maxValue)
 }
 
 // RandomSource produces a rand.Rand randomness source that is non-deterministic.

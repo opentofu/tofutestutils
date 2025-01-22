@@ -62,19 +62,19 @@ func IDFromSource(random *rand.Rand, length uint, characterSpace CharacterRange)
 
 // DeterministicInt produces a deterministic random integer based on the test name between the specified min and
 // max value (inclusive).
-func DeterministicInt(t *testing.T, min int, max int) int {
-	return IntFromSource(DeterministicSource(t), min, max)
+func DeterministicInt(t *testing.T, minValue int, maxValue int) int {
+	return IntFromSource(DeterministicSource(t), minValue, maxValue)
 }
 
 // Int produces a random integer between the specified min and max value (inclusive).
-func Int(min int, max int) int {
-	return IntFromSource(Source(), min, max)
+func Int(minValue int, maxValue int) int {
+	return IntFromSource(Source(), minValue, maxValue)
 }
 
 // IntFromSource produces a random integer between the specified min and max value (inclusive).
-func IntFromSource(source *rand.Rand, min int, max int) int {
+func IntFromSource(source *rand.Rand, minValue int, maxValue int) int {
 	// The logic for this function was moved from mock_value_composer.go
-	return source.Intn(max+1-min) + min
+	return source.Intn(maxValue+1-minValue) + minValue
 }
 
 // Source produces a rand.Rand randomness source that is non-deterministic.
