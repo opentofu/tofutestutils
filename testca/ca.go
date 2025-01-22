@@ -22,25 +22,25 @@ import (
 )
 
 const caKeySize = 2048
-const expirationYears = 10
 
-// New creates an x509 CA certificate that can produce certificates for testing purposes. Pass a desired randomSource
-// to create a deterministic source of certificates alongside a deterministic timeSource.
-func New(t *testing.T, randomSource io.Reader, timeSource func() time.Time) CertificateAuthority {
-	// We use a non-deterministic cheap randomness source because the certificate won't be reproducible anyway due to
-	// the NotBefore / NotAfter being different every time. We don't use crypto/rand.Rand because it can get blocked
-	// if not enough entropy is available and it doesn't matter for the test use case.
+// startDate holds the date of the fork announcement. This is the starting date for the validity of the certificate by
+// default.
+var startDate = time.Date(2023, 9, 5, 0, 0, 0, 0, time.UTC)
 
-	now := timeSource()
+// expirationYears is the number of years the certificate is valid by default.
+const expirationYears = 30
 
+// New creates an x509 CA certificate that can produce certificates for testing purposes. Pass a desired deterministic
+// randomSource to create a deterministic certificate.
+func New(t *testing.T, randomSource io.Reader) CertificateAuthority {
 	caCert := &x509.Certificate{
 		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{
 			Organization: []string{"OpenTofu a Series of LF Projects, LLC"},
 			Country:      []string{"US"},
 		},
-		NotBefore:             now,
-		NotAfter:              now.AddDate(expirationYears, 0, 0),
+		NotBefore:             startDate,
+		NotAfter:              startDate.AddDate(expirationYears, 0, 0),
 		IsCA:                  true,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
@@ -70,7 +70,6 @@ func New(t *testing.T, randomSource io.Reader, timeSource func() time.Time) Cert
 		privateKey: caPrivateKey,
 		serial:     big.NewInt(0),
 		lock:       &sync.Mutex{},
-		timeSource: timeSource,
 	}
 }
 
@@ -88,6 +87,11 @@ type CertConfig struct {
 	//
 	//     []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
 	ExtKeyUsage []x509.ExtKeyUsage
+	// StartTime indicates when the certificate should start to be valid. This defaults to startDate.
+	NotBefore *time.Time
+	// NotAfter indicates a time at which the certificate should stop being valid. This defaults to expirationYears
+	// after startDate
+	NotAfter *time.Time
 }
 
 // KeyPair contains a certificate and private key in PEM format.
@@ -153,7 +157,6 @@ type ca struct {
 	lock       *sync.Mutex
 	t          *testing.T
 	random     io.Reader
-	timeSource func() time.Time
 }
 
 func (c *ca) GetClientTLSConfig() *tls.Config {
@@ -185,13 +188,24 @@ func (c *ca) CreateConfiguredCert(config CertConfig) KeyPair {
 		ipAddresses[i] = net.ParseIP(ip)
 	}
 
-	now := c.timeSource()
+	var notBefore time.Time
+	if config.NotBefore != nil {
+		notBefore = *config.NotBefore
+	} else {
+		notBefore = startDate
+	}
+	var notAfter time.Time
+	if config.NotAfter != nil {
+		notAfter = *config.NotAfter
+	} else {
+		notAfter = notBefore.Add(expirationYears * 365 * 24 * time.Hour)
+	}
 
 	cert := &x509.Certificate{
 		SerialNumber: c.serial,
 		Subject:      config.Subject,
-		NotBefore:    now,
-		NotAfter:     now.AddDate(0, 0, 1),
+		NotBefore:    notBefore,
+		NotAfter:     notAfter,
 		SubjectKeyId: []byte{1},
 		ExtKeyUsage:  config.ExtKeyUsage,
 		KeyUsage:     x509.KeyUsageDigitalSignature,
