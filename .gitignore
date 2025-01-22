@@ -1,2 +1,28 @@
 .idea
+*.dll
+*.exe
+.DS_Store
+.vagrant/
+*.backup
+*.bak
 *~
+.*.swp
+*.iml
+*.test
+
+vendor/
+
+# VSCode debugging configurations
+.vscode/launch.json
+
+# Coverage
+coverage.txt
+
+# GoReleaser build directory
+dist/
+
+# Licensei cache file
+.licensei.cache
+
+# Development temp folder
+tmp
