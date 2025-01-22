@@ -3,6 +3,8 @@
 // Copyright (c) 2023 HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
+//go:build !go1.24
+
 package tofutestutils
 
 import (
