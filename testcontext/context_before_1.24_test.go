@@ -3,18 +3,18 @@
 // Copyright (c) 2023 HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-package testcontext_test
+//go:build !go1.24
+
+package testcontext
 
 import (
 	"testing"
 	"time"
-
-	"github.com/opentofu/tofutestutils/testcontext"
 )
 
 func TestContext(t *testing.T) {
 	const checkTime = 20 * time.Second
-	ctx := testcontext.Context(
+	ctx := contextWithParameters(
 		t,
 		4,
 		30*time.Second,
