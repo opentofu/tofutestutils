@@ -9,8 +9,9 @@ package tofutestutils
 
 import (
 	"context"
-	"github.com/opentofu/tofutestutils/testcontext"
 	"testing"
+
+	"github.com/opentofu/tofutestutils/testcontext"
 )
 
 // Context creates a context with a deadline that allows for enough time to clean up a test before the testing framework
