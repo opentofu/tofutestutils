@@ -6,8 +6,9 @@
 package tofutestutils
 
 import (
-	"github.com/opentofu/tofutestutils/testca"
 	"testing"
+
+	"github.com/opentofu/tofutestutils/testca"
 )
 
 // CA returns a certificate authority configured for the provided test. This implementation will configure the CA to use

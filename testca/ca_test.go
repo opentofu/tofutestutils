@@ -9,13 +9,14 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"github.com/opentofu/tofutestutils"
-	"github.com/opentofu/tofutestutils/testca"
-	"github.com/opentofu/tofutestutils/testrandom"
 	"io"
 	"net"
 	"strconv"
 	"testing"
+
+	"github.com/opentofu/tofutestutils"
+	"github.com/opentofu/tofutestutils/testca"
+	"github.com/opentofu/tofutestutils/testrandom"
 )
 
 func TestCA(t *testing.T) {
