@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/opentofu/tofutestutils"
 	"github.com/opentofu/tofutestutils/testca"
 	"github.com/opentofu/tofutestutils/testrandom"
 )
@@ -35,11 +34,14 @@ func testCAIncorrectCertificate(t *testing.T) {
 	done := make(chan struct{})
 	var serverErr error
 	t.Logf("🍦 Setting up TLS server...")
-	tlsListener := tofutestutils.Must2(tls.Listen(
+	tlsListener, err := tls.Listen(
 		"tcp",
 		"127.0.0.1:0",
-		ca1.CreateLocalhostServerCert().GetServerTLSConfig()),
+		ca1.CreateLocalhostServerCert().GetServerTLSConfig(),
 	)
+	if err != nil {
+		t.Fatalf("❌ Failed to set up listener: %v", err)
+	}
 	t.Cleanup(func() {
 		t.Logf("🍦 Server closing listener...")
 		if err := tlsListener.Close(); err != nil {
@@ -101,7 +103,10 @@ func testCACorrectCertificate(t *testing.T) {
 	done := make(chan struct{})
 
 	t.Logf("🍦 Setting up TLS server...")
-	tlsListener := tofutestutils.Must2(tls.Listen("tcp", "127.0.0.1:0", ca.CreateLocalhostServerCert().GetServerTLSConfig()))
+	tlsListener, err := tls.Listen("tcp", "127.0.0.1:0", ca.CreateLocalhostServerCert().GetServerTLSConfig())
+	if err != nil {
+		t.Fatalf("❌ Failed to set up listener: %v", err)
+	}
 	t.Cleanup(func() {
 		t.Logf("🍦 Server closing listener...")
 		if err := tlsListener.Close(); err != nil {
@@ -133,7 +138,10 @@ func testCACorrectCertificate(t *testing.T) {
 	}()
 	t.Logf("🔌 Client connecting to server...")
 	port := tlsListener.Addr().(*net.TCPAddr).Port
-	client := tofutestutils.Must2(tls.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)), ca.GetClientTLSConfig()))
+	client, err := tls.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)), ca.GetClientTLSConfig())
+	if err != nil {
+		t.Fatalf("❌ Failed to connect to server: %v", err)
+	}
 	defer func() {
 		t.Logf("🔌 Client closing connection...")
 		if err := client.Close(); err != nil {
@@ -141,7 +149,10 @@ func testCACorrectCertificate(t *testing.T) {
 		}
 	}()
 	t.Logf("🔌 Client reading greeting...")
-	greeting := tofutestutils.Must2(io.ReadAll(client))
+	greeting, err := io.ReadAll(client)
+	if err != nil {
+		t.Fatalf("❌ Failed to read greeting: %v", err)
+	}
 	if string(greeting) != testGreeting {
 		t.Fatalf("❌ Client received incorrect greeting: %s", greeting)
 	}
