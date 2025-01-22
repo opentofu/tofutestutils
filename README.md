@@ -69,25 +69,46 @@ func TestMySocket(t *testing.T) {
 	ca := tofutestutils.CA(t)
 
 	// Server side:
-	tlsListener := tofutestutils.Must2(tls.Listen("tcp", "127.0.0.1:0", ca.CreateLocalhostServerCert().GetServerTLSConfig()))
+	tlsListener, err := tls.Listen("tcp", "127.0.0.1:0", ca.CreateLocalhostServerCert().GetServerTLSConfig())
+	if err != nil {
+		t.Fatalf("Failed to open server: %v", err)
+    }
+	defer func() {
+		if err = tlsListener.Close(); err != nil {
+			t.Fatalf("Failed to close server listener: %v", err)
+        }
+	}()
 	go func() {
 		conn, serverErr := tlsListener.Accept()
 		if serverErr != nil {
 			return
 		}
 		defer func() {
-			_ = conn.Close()
+			if err := conn.Close(); err != nil {
+				t.Logf("Failed to close connection: %v", err)
+            }
 		}()
-		_, _ = conn.Write([]byte("Hello world!"))
+		if _, err = conn.Write([]byte("Hello world!")); err != nil {
+			t.Logf("Failed to write to client: %v", err)
+        }
 	}()
 
 	// Client side:
 	port := tlsListener.Addr().(*net.TCPAddr).Port
-	client := tofutestutils.Must2(tls.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)), ca.GetClientTLSConfig()))
+	client, err := tls.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)), ca.GetClientTLSConfig())
+	if err != nil {
+		t.Fatalf("Failed to open connection to server: %v", err)
+    }
 	defer func() {
-		_ = client.Close()
+		if err = client.Close(); err != nil {
+			t.Fatalf("Failed to close client: %v", err)
+        }
 	}()
 
-	t.Logf("%s", tofutestutils.Must2(io.ReadAll(client)))
+	data, err := io.ReadAll(client)
+	if err != nil {
+		t.Fatal(err)
+    }
+	t.Logf("%s", data)
 }
 ```
