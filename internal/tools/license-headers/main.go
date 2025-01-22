@@ -20,7 +20,7 @@ func main() {
 	if checkOnly {
 		params = append(params, "--plan")
 	}
-	cmd := exec.Command(params[0], params[1:]...)
+	cmd := exec.Command(params[0], params[1:]...) //nolint:gosec // The parameters here are carefully assembled.
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
