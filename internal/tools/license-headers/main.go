@@ -4,65 +4,31 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"log"
 	"os"
-	"path/filepath"
-	"strings"
+	"os/exec"
 )
 
 func main() {
-	header := `// Copyright (c) The OpenTofu Authors
-// SPDX-License-Identifier: MPL-2.0
-
-`
 	checkOnly := false
 	flag.BoolVar(&checkOnly, "check-only", checkOnly, "Only check if the license headers are correct.")
 	flag.Parse()
 
-	var files []string
-	if err := filepath.Walk(".", func(filePath string, info os.FileInfo, err error) error {
-		if err == nil && strings.HasSuffix(info.Name(), ".go") {
-			files = append(files, filePath)
-		}
-		return nil
-	}); err != nil {
-		log.Fatal(err)
+	params := []string{"go", "run", "github.com/hashicorp/copywrite@v0.19.0", "headers"}
+	if checkOnly {
+		params = append(params, "--plan")
 	}
+	cmd := exec.Command(params[0], params[1:]...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		var exitError *exec.ExitError
+		if errors.As(err, &exitError) {
+			os.Exit(exitError.ExitCode())
+		}
 
-	hasError := false
-	checkFailed := false
-	for _, file := range files {
-		fileContents, err := os.ReadFile(file)
-		if err != nil {
-			log.Printf("Failed to read file %s (%v)", file, err)
-			hasError = true
-			continue
-		}
-		if strings.HasPrefix(string(fileContents), header) {
-			continue
-		}
-		if checkOnly {
-			log.Printf("%s does not have the correct license headers.", file)
-			checkFailed = true
-			continue
-		}
-		log.Printf("Updating license headers in %s...", file)
-		tempFile := file + "~"
-		if err := os.WriteFile(tempFile, []byte(header+string(fileContents)), 0644); err != nil { //nolint:gosec //The permissions are ok here.
-			log.Printf("Failed to write file %s (%v)", tempFile, err)
-			hasError = true
-			continue
-		}
-		if err := os.Rename(tempFile, file); err != nil {
-			log.Printf("Failed to move temporary file %s to %s (%v)", tempFile, file, err)
-			hasError = true
-		}
-	}
-	if hasError {
-		log.Fatal("One or more files have failed processing.")
-	}
-	if checkFailed {
-		log.Fatalf("One or more files don't contain the correct license headers, please run go generate.")
+		log.Fatal(err)
 	}
 }
