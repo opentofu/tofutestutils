@@ -1,0 +1,33 @@
+# Copyright (c) The OpenTofu Authors
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2023 HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+.idea
+*.dll
+*.exe
+.DS_Store
+.vagrant/
+*.backup
+*.bak
+*~
+.*.swp
+*.iml
+*.test
+
+vendor/
+
+# VSCode debugging configurations
+.vscode/launch.json
+
+# Coverage
+coverage.txt
+
+# GoReleaser build directory
+dist/
+
+# Licensei cache file
+.licensei.cache
+
+# Development temp folder
+tmp
